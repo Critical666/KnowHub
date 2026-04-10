@@ -1,0 +1,18 @@
+/* ============================================
+   Main Styles Entry Point
+   ============================================ */
+
+/* Design System & Base Styles */
+@import "./styles/global.css";
+
+/* Layout & Navigation */
+@import "./styles/layout.css";
+
+/* Page-specific Styles */
+@import "./styles/home.css";
+@import "./styles/dashboard.css";
+@import "./styles/pricing.css";
+
+/* Component Styles */
+@import "./styles/kanban.css";
+@import "./styles/modal.css";
