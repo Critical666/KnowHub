@@ -1,15 +1,14 @@
-from sys import version
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import tasks, webhooks
+from app.api import tasks, webhooks, knowledge_bases, documents
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Task Board API",
-    description="B2B Task Board App",
+    title="KnowHub API",
+    description="Enterprise RAG Knowledge Base SaaS",
     version="1.0.0"
 )
 
@@ -21,5 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 现有路由
 app.include_router(tasks.router)
 app.include_router(webhooks.router)
+
+# RAG知识库路由
+app.include_router(knowledge_bases.router)
+app.include_router(documents.router)

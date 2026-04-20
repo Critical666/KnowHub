@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Redis - Celery消息队列
+  redis:
+    container_name: knowhub-redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./volumes/redis:/data
+    restart: unless-stopped
+
+  # MinIO - 对象存储（文档文件）
+  minio:
+    container_name: knowhub-minio
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./volumes/minio:/data
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
