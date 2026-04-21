@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     # 检索配置
     RETRIEVAL_TOP_K: int = 5
     RETRIEVAL_SCORE_THRESHOLD: float = 0.7
+
+    # 组织人数设置
+    FREE_TIER_MEMBERSHIP_LIMIT:int = 2
+    PRO_TIER_MEMBERSHIP_LIMIT:int = 0 # zero means unlimited
     
     class Config:
         env_file = ".env"

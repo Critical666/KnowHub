@@ -1,4 +1,4 @@
-from milvus_lite import MilvusClient
+from pymilvus import MilvusClient
 from typing import Collection, List, Dict, Optional, Any
 import os
 import logging
