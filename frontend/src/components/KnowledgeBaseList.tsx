@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, Card, Button, Modal, Form, Input, message, Upload } from 'antd';
+import { List, Card, Button, Modal, Form, Input, message, Upload, Alert, Spin } from 'antd';
 import { PlusOutlined, MessageOutlined, DeleteOutlined, UploadOutlined, FileOutlined } from '@ant-design/icons';
 import { getKnowledgeBases, createKnowledgeBase, deleteKnowledgeBase, uploadDocument, getDocuments } from '../services/api';
 
 const KnowledgeBaseList = () => {
   const [kbs, setKbs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedKb, setSelectedKb] = useState(null);
   const [documents, setDocuments] = useState([]);
@@ -18,12 +19,14 @@ const KnowledgeBaseList = () => {
   // 获取知识库列表
   const fetchKnowledgeBases = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await getKnowledgeBases();
       setKbs(response.items);
     } catch (error) {
+      console.error('获取知识库列表失败:', error);
+      setError('无法连接到服务器，请确保后端服务已启动 (python -m uvicorn app.main:app --reload)');
       message.error('获取知识库列表失败');
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -42,7 +45,7 @@ const KnowledgeBaseList = () => {
       form.resetFields();
       fetchKnowledgeBases();
     } catch (error) {
-      message.error('创建失败');
+      message.error('创建失败: ' + (error.message || '未知错误'));
       console.error(error);
     }
   };
@@ -54,7 +57,7 @@ const KnowledgeBaseList = () => {
       message.success('删除成功');
       fetchKnowledgeBases();
     } catch (error) {
-      message.error('删除失败');
+      message.error('删除失败: ' + (error.message || '未知错误'));
       console.error(error);
     }
   };
@@ -84,13 +87,38 @@ const KnowledgeBaseList = () => {
       // 刷新知识库列表以更新文档计数
       fetchKnowledgeBases();
     } catch (error) {
-      message.error('上传失败');
+      message.error('上传失败: ' + (error.message || '未知错误'));
       console.error(error);
     } finally {
       setUploadLoading(false);
     }
     return false; // 阻止默认上传行为
   };
+
+  // 显示错误信息
+  if (error) {
+    return (
+      <div style={{ padding: '24px' }}>
+        <Alert
+          message="连接错误"
+          description={
+            <div>
+              <p>{error}</p>
+              <p>后端服务启动命令：</p>
+              <pre style={{ background: '#f5f5f5', padding: '12px', borderRadius: '4px' }}>
+                cd backend && python -m uvicorn app.main:app --reload --port 8000
+              </pre>
+              <Button type="primary" onClick={fetchKnowledgeBases} style={{ marginTop: '16px' }}>
+                重试
+              </Button>
+            </div>
+          }
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '24px' }}>
@@ -104,42 +132,43 @@ const KnowledgeBaseList = () => {
         </Button>
       </div>
 
-      <List
-        grid={{ gutter: 16, column: 3 }}
-        dataSource={kbs}
-        loading={loading}
-        renderItem={(kb) => (
-          <List.Item>
-            <Card
-              title={kb.name}
-              actions={[
-                <Button
-                  icon={<MessageOutlined />}
-                  onClick={() => navigate(`/knowledge/${kb.id}/chat`)}
-                >
-                  对话
-                </Button>,
-                <Button
-                  icon={<FileOutlined />}
-                  onClick={() => handleViewDocs(kb)}
-                >
-                  文档({kb.document_count})
-                </Button>,
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => handleDelete(kb.id)}
-                >
-                  删除
-                </Button>,
-              ]}
-            >
-              <p>{kb.description}</p>
-              <p>分块数: {kb.total_chunks}</p>
-            </Card>
-          </List.Item>
-        )}
-      />
+      <Spin spinning={loading} tip="加载中...">
+        <List
+          grid={{ gutter: 16, column: 3 }}
+          dataSource={kbs}
+          renderItem={(kb) => (
+            <List.Item>
+              <Card
+                title={kb.name}
+                actions={[
+                  <Button
+                    icon={<MessageOutlined />}
+                    onClick={() => navigate(`/knowledge/${kb.id}/chat`)}
+                  >
+                    对话
+                  </Button>,
+                  <Button
+                    icon={<FileOutlined />}
+                    onClick={() => handleViewDocs(kb)}
+                  >
+                    文档({kb.document_count})
+                  </Button>,
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(kb.id)}
+                  >
+                    删除
+                  </Button>,
+                ]}
+              >
+                <p>{kb.description}</p>
+                <p>分块数: {kb.total_chunks}</p>
+              </Card>
+            </List.Item>
+          )}
+        />
+      </Spin>
 
       {/* 新建知识库弹窗 */}
       <Modal
