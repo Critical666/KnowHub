@@ -132,7 +132,7 @@ function App() {
         <Route
           path="/sign-in"
           element={
-            <>
+            <SignedOut>
               <UnsignedHeader />
               <Content
                 style={{
@@ -146,13 +146,13 @@ function App() {
               >
                 <SignInPage />
               </Content>
-            </>
+            </SignedOut>
           }
         />
         <Route
           path="/sign-up"
           element={
-            <>
+            <SignedOut>
               <UnsignedHeader />
               <Content
                 style={{
@@ -166,7 +166,7 @@ function App() {
               >
                 <SignUpPage />
               </Content>
-            </>
+            </SignedOut>
           }
         />
         {/* 定价页面 - 公共访问 */}
