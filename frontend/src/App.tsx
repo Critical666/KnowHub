@@ -133,19 +133,21 @@ function App() {
           path="/sign-in"
           element={
             <SignedOut>
-              <UnsignedHeader />
-              <Content
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
-                  minHeight: 'calc(100vh - 64px)',
-                }}
-              >
-                <SignInPage />
-              </Content>
+              <>
+                <UnsignedHeader />
+                <Content
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+                    minHeight: 'calc(100vh - 64px)',
+                  }}
+                >
+                  <SignInPage />
+                </Content>
+              </>
             </SignedOut>
           }
         />
@@ -153,19 +155,21 @@ function App() {
           path="/sign-up"
           element={
             <SignedOut>
-              <UnsignedHeader />
-              <Content
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
-                  minHeight: 'calc(100vh - 64px)',
-                }}
-              >
-                <SignUpPage />
-              </Content>
+              <>
+                <UnsignedHeader />
+                <Content
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+                    minHeight: 'calc(100vh - 64px)',
+                  }}
+                >
+                  <SignUpPage />
+                </Content>
+              </>
             </SignedOut>
           }
         />
