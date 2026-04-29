@@ -1,16 +1,38 @@
 import { Routes, Route, Navigate, Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { SignedIn, SignedOut, useUser, useAuth, UserButton, OrganizationSwitcher } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, useUser, useAuth, UserButton, OrganizationSwitcher, SignIn, SignUp } from '@clerk/clerk-react';
 import { Layout, Menu, Button } from 'antd';
 import { DatabaseOutlined, ProjectOutlined } from '@ant-design/icons';
 import HomePage from './pages/HomePage';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
 import PricingPage from './pages/PricingPage';
 import KnowledgeBaseList from './components/KnowledgeBaseList';
 import ChatInterface from './components/ChatInterface';
 
 const { Header, Content } = Layout;
+
+// Clerk 外观配置
+const clerkAppearance = {
+  elements: {
+    rootBox: {
+      width: '100%'
+    },
+    card: {
+      background: 'white',
+      borderRadius: '16px',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      padding: '32px'
+    },
+    headerTitle: {
+      fontSize: '24px',
+      fontWeight: 600
+    },
+    formButtonPrimary: {
+      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+      fontSize: '16px',
+      height: '48px'
+    }
+  }
+};
 
 // 未登录时的导航栏
 function UnsignedHeader() {
@@ -117,8 +139,8 @@ function HomeLayout() {
   );
 }
 
-// 认证页面布局
-function AuthLayout() {
+// 登录页面
+function SignInPage() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <UnsignedHeader />
@@ -131,7 +153,39 @@ function AuthLayout() {
           background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
         }}
       >
-        <Outlet />
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+          <SignIn
+            signUpUrl="/sign-up"
+            fallbackRedirectUrl="/dashboard"
+            appearance={clerkAppearance}
+          />
+        </div>
+      </Content>
+    </Layout>
+  );
+}
+
+// 注册页面
+function SignUpPage() {
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <UnsignedHeader />
+      <Content
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+          <SignUp
+            signInUrl="/sign-in"
+            fallbackRedirectUrl="/dashboard"
+            appearance={clerkAppearance}
+          />
+        </div>
       </Content>
     </Layout>
   );
@@ -178,11 +232,9 @@ function App() {
       {/* 首页 */}
       <Route path="/" element={<HomeLayout />} />
       
-      {/* 认证页面 */}
-      <Route element={<AuthLayout />}>
-        <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
-      </Route>
+      {/* 认证页面 - 直接使用内联组件 */}
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/sign-up" element={<SignUpPage />} />
       
       {/* 定价页面 */}
       <Route path="/pricing" element={<PricingLayout />} />
