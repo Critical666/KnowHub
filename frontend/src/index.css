@@ -1,18 +1,6 @@
-/* ============================================
-   Main Styles Entry Point
-   ============================================ */
+/**
+ * index.css
+ * 主样式入口 - 使用 ITCSS 架构
+ */
 
-/* Design System & Base Styles */
-@import "./styles/global.css";
-
-/* Layout & Navigation */
-@import "./styles/layout.css";
-
-/* Page-specific Styles */
-@import "./styles/home.css";
-@import "./styles/dashboard.css";
-@import "./styles/pricing.css";
-
-/* Component Styles */
-@import "./styles/kanban.css";
-@import "./styles/modal.css";
+@import './styles/main.css';

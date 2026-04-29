@@ -1,0 +1,57 @@
+/**
+ * main.css
+ * ITCSS 架构入口文件
+ * 按特定顺序导入各层样式
+ */
+
+/* ============================================
+   1. Settings
+   变量和配置（无实际 CSS 输出）
+   ============================================ */
+@import './1-settings/_colors.css';
+@import './1-settings/_typography.css';
+@import './1-settings/_spacing.css';
+@import './1-settings/_effects.css';
+@import './1-settings/_breakpoints.css';
+
+/* ============================================
+   2. Tools
+   Mixins 和函数（无实际 CSS 输出）
+   ============================================ */
+@import './2-tools/_mixins.css';
+
+/* ============================================
+   3. Generic
+   重置和规范化样式
+   ============================================ */
+@import './3-generic/_reset.css';
+
+/* ============================================
+   4. Elements
+   基础 HTML 元素样式
+   ============================================ */
+@import './4-elements/_base.css';
+@import './4-elements/_animations.css';
+
+/* ============================================
+   5. Objects
+   布局对象和模式
+   ============================================ */
+@import './5-objects/_layout.css';
+
+/* ============================================
+   6. Components
+   具体 UI 组件样式
+   ============================================ */
+@import './6-components/_buttons.css';
+@import './6-components/_kanban.css';
+@import './6-components/_modal.css';
+@import './6-components/_pages.css';
+@import './6-components/_chat.css';
+@import './6-components/_knowledge-base.css';
+
+/* ============================================
+   7. Utilities
+   工具类和覆盖
+   ============================================ */
+@import './7-utilities/_utilities.css';

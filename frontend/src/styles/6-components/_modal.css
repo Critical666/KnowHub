@@ -1,6 +1,7 @@
-/* ============================================
-   Modal & Form Styles
-   ============================================ */
+/**
+ * 6-components/_modal.css
+ * 模态框和表单组件样式
+ */
 
 /* Modal Overlay */
 .modal-overlay {
@@ -17,17 +18,8 @@
   animation: fadeIn 0.2s ease-out;
 }
 
-[data-theme="dark"] .modal-overlay {
+[data-theme='dark'] .modal-overlay {
   background: rgba(0, 0, 0, 0.7);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 /* Modal Container */
@@ -41,17 +33,6 @@
   overflow: hidden;
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid var(--border-color);
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
 
 /* Modal Header */
@@ -117,12 +98,8 @@
   margin-bottom: var(--space-2);
 }
 
-.form-label::after {
-  content: '';
-}
-
 /* Required indicator */
-.form-label[for="title"]::after {
+.form-label[for='title']::after {
   content: ' *';
   color: var(--error-500);
 }
@@ -178,10 +155,6 @@
   padding-right: var(--space-10);
 }
 
-.form-select option {
-  padding: var(--space-2);
-}
-
 /* Form Actions */
 .form-actions {
   display: flex;
@@ -218,17 +191,7 @@
   gap: var(--space-1);
 }
 
-/* Form Help Text */
-.form-help {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  margin-top: var(--space-1);
-}
-
-/* ============================================
-   Responsive Adjustments
-   ============================================ */
-
+/* Responsive */
 @media (max-width: 640px) {
   .modal-overlay {
     padding: var(--space-3);
