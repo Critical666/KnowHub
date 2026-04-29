@@ -13,6 +13,7 @@ const KnowledgeBaseList = () => {
   const [documents, setDocuments] = useState([]);
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -38,15 +39,20 @@ const KnowledgeBaseList = () => {
 
   // 创建知识库
   const handleCreate = async (values) => {
+    console.log('创建知识库，表单数据:', values);
+    setCreateLoading(true);
     try {
-      await createKnowledgeBase(values);
+      const result = await createKnowledgeBase(values);
+      console.log('创建成功:', result);
       message.success('创建成功');
       setIsModalOpen(false);
       form.resetFields();
       fetchKnowledgeBases();
     } catch (error) {
+      console.error('创建失败:', error);
       message.error('创建失败: ' + (error.message || '未知错误'));
-      console.error(error);
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -176,17 +182,22 @@ const KnowledgeBaseList = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         onOk={() => form.submit()}
+        confirmLoading={createLoading}
       >
-        <Form form={form} onFinish={handleCreate}>
+        <Form 
+          form={form} 
+          onFinish={handleCreate}
+          layout="vertical"
+        >
           <Form.Item
             name="name"
             label="名称"
             rules={[{ required: true, message: '请输入知识库名称' }]}
           >
-            <Input />
+            <Input placeholder="请输入知识库名称" />
           </Form.Item>
           <Form.Item name="description" label="描述">
-            <Input.TextArea rows={4} />
+            <Input.TextArea rows={4} placeholder="请输入知识库描述（可选）" />
           </Form.Item>
         </Form>
       </Modal>
