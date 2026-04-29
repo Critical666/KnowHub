@@ -1,5 +1,4 @@
 import json
-from sys import prefix
 from fastapi import APIRouter, Request, HTTPException, status
 from svix.webhooks import Webhook, WebhookVerificationError
 from app.core.config import settings
