@@ -153,11 +153,10 @@ function SignInPage() {
           background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
         }}
       >
-        <div style={{ width: '100%', maxWidth: '400px' }}>
+        <div style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '32px', borderRadius: '16px' }}>
           <SignIn
             signUpUrl="/sign-up"
             fallbackRedirectUrl="/dashboard"
-            appearance={clerkAppearance}
           />
         </div>
       </Content>
@@ -179,11 +178,10 @@ function SignUpPage() {
           background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
         }}
       >
-        <div style={{ width: '100%', maxWidth: '400px' }}>
+        <div style={{ width: '100%', maxWidth: '400px', background: 'white', padding: '32px', borderRadius: '16px' }}>
           <SignUp
             signInUrl="/sign-in"
             fallbackRedirectUrl="/dashboard"
-            appearance={clerkAppearance}
           />
         </div>
       </Content>

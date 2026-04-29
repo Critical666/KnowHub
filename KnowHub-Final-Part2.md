@@ -805,7 +805,7 @@ docker-compose up -d
 
 # 2. 启动Celery Worker
 cd backend
-celery -A app.celery_tasks.celery_app worker --loglevel=info
+uv run celery -A app.celery_tasks.celery_app worker --loglevel=info
 
 # 3. 启动后端API
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
