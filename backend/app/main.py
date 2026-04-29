@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api import tasks, webhooks, knowledge_bases, documents
+from app.api import tasks, webhooks, knowledge_bases, documents, chat
 
 Base.metadata.create_all(bind=engine)
 
@@ -27,3 +27,4 @@ app.include_router(webhooks.router)
 # RAG知识库路由
 app.include_router(knowledge_bases.router)
 app.include_router(documents.router)
+app.include_router(chat.router)

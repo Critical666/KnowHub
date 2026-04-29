@@ -11,7 +11,7 @@ from app.schemas.knowledge_base import (
     KnowledgeBaseResponse,
     KnowledgeBaseListResponse
 )
-from app.services.vector_store import MilvusVectorStore
+from app.services.rag.vector_store import MilvusVectorStore
 from app.core.config import settings
 
 router = APIRouter(prefix="/api/v1/knowledge-bases", tags=["knowledge-bases"])

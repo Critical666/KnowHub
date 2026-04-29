@@ -24,8 +24,8 @@ class DocumentResponse(BaseModel):
     status: str
     chunk_count: int
     error_message: Optional[str]
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
 
     class Config:
         from_attributes = True

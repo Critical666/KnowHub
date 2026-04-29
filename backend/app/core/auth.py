@@ -93,10 +93,9 @@ async def get_current_user(request: Request) -> AuthUser:
             status_code=status.HTTP_401_UNAUTHORIZED, detail = 'Not authenticated'
         )
     
+    # 如果没有组织，使用 user_id 作为 org_id（个人模式）
     if not org_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail = 'No organization selected'
-        )
+        org_id = user_id
 
     # 6. 构造并返回 AuthUser 实例。
     return AuthUser(user_id=user_id, org_id=org_id, org_permissions=org_permissions)
