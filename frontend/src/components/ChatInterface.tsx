@@ -1,25 +1,19 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Input, Button, List, Card } from 'antd';
+import { Input, Button, List, Card, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-
-// 模拟消息数据
-const mockMessages = [
-  {
-    id: '1',
-    role: 'assistant',
-    content: '您好！我是您的 AI 助手。我可以帮您查询知识库中的信息。请告诉我您想了解什么？'
-  }
-];
+import { sendChatMessage, getChatMessages } from '../services/api';
 
 const ChatInterface = () => {
   const { kbId } = useParams<{ kbId: string }>();
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
 
+  // 发送消息
   const handleSend = useCallback(async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !kbId) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -31,17 +25,32 @@ const ChatInterface = () => {
     setInput('');
     setLoading(true);
 
-    // 模拟 AI 回复
-    setTimeout(() => {
+    try {
+      const response = await sendChatMessage(kbId, {
+        message: input.trim(),
+        session_id: sessionId || undefined,
+      });
+
+      // 保存 session_id
+      if (!sessionId) {
+        setSessionId(response.session_id);
+      }
+
       const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: `这是关于您提问 "${input}" 的回答。\n\n基于知识库中的文档，我找到了以下相关信息...\n\n（这是模拟回复，实际应调用后端 API）`
+        id: response.id,
+        role: response.role,
+        content: response.content,
+        sources: response.sources,
       };
+
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      message.error('发送消息失败');
+      console.error(error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, [input]);
+    }
+  }, [input, kbId, sessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -66,8 +75,7 @@ const ChatInterface = () => {
             renderItem={(msg: any) => (
               <List.Item
                 style={{
-                  justifyContent:
-                    msg.role === 'user' ? 'flex-end' : 'flex-start',
+                  justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
                   padding: '8px 0',
                 }}
               >
@@ -76,14 +84,25 @@ const ChatInterface = () => {
                     maxWidth: '70%',
                     padding: '12px 16px',
                     borderRadius: '12px',
-                    background:
-                      msg.role === 'user' ? '#1890ff' : '#f0f0f0',
+                    background: msg.role === 'user' ? '#1890ff' : '#f0f0f0',
                     color: msg.role === 'user' ? 'white' : 'black',
                     wordBreak: 'break-word',
-                    whiteSpace: 'pre-wrap'
+                    whiteSpace: 'pre-wrap',
                   }}
                 >
                   {msg.content}
+                  {msg.sources && msg.sources.length > 0 && (
+                    <div style={{ marginTop: 8, fontSize: 12, opacity: 0.8 }}>
+                      <div style={{ borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: 8 }}>
+                        参考来源:
+                      </div>
+                      {msg.sources.map((source: any, idx: number) => (
+                        <div key={idx} style={{ marginTop: 4 }}>
+                          [{idx + 1}] 相关度: {(source.score * 100).toFixed(1)}%
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </List.Item>
             )}

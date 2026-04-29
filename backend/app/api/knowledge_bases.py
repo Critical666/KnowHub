@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.auth import AuthUser, get_current_user
+from app.core.auth import get_current_user, AuthUser
 from app.models.knowledge_base import KnowledgeBase, KBStatus
 from app.schemas.knowledge_base import (
     KnowledgeBaseCreate, 
@@ -23,7 +23,7 @@ def list_knowledge_bases(
     db: Session = Depends(get_db)
 ):
     """
-    获取当前组织的知识库列表
+    获取知识库列表
     """
     kbs = db.query(KnowledgeBase).filter(
         KnowledgeBase.org_id == user.org_id,

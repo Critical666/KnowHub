@@ -1,8 +1,7 @@
 import { Routes, Route, Navigate, Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { Layout, Menu, Button } from 'antd';
-import { DatabaseOutlined, ProjectOutlined, HomeOutlined } from '@ant-design/icons';
+import { Layout, Menu } from 'antd';
+import { DatabaseOutlined, HomeOutlined } from '@ant-design/icons';
 import HomePage from './pages/HomePage';
-import DashboardPage from './pages/DashboardPage';
 import PricingPage from './pages/PricingPage';
 import KnowledgeBaseList from './components/KnowledgeBaseList';
 import ChatInterface from './components/ChatInterface';
@@ -12,18 +11,12 @@ const { Header, Content } = Layout;
 // 导航栏
 function AppHeader() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const items = [
     {
       key: '/',
       icon: <HomeOutlined />,
       label: <Link to="/">首页</Link>,
-    },
-    {
-      key: '/dashboard',
-      icon: <ProjectOutlined />,
-      label: <Link to="/dashboard">任务看板</Link>,
     },
     {
       key: '/knowledge',
@@ -34,7 +27,6 @@ function AppHeader() {
 
   const getSelectedKey = () => {
     if (location.pathname.startsWith('/knowledge')) return '/knowledge';
-    if (location.pathname === '/dashboard') return '/dashboard';
     return '/';
   };
 
@@ -71,7 +63,6 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/knowledge" element={<KnowledgeBaseList />} />
         <Route path="/knowledge/:kbId/chat" element={<ChatInterface />} />
         <Route path="/pricing" element={<PricingPage />} />

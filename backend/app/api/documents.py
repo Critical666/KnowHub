@@ -175,7 +175,7 @@ async def upload_document(
         db.commit()
         db.refresh(doc)
         
-        # TODO: 触发异步处理任务（将在Phase 4实现）
+        # TODO: 触发异步处理任务
         # from app.celery_tasks.document_tasks import process_document_task
         # process_document_task.delay(doc_id, object_name, kb_id, user.org_id)
         
@@ -260,7 +260,7 @@ def delete_document(
     
     # 删除向量存储中的数据
     try:
-        from app.services.vector_store import MilvusVectorStore
+        from app.services.rag.vector_store import MilvusVectorStore
         vector_store = MilvusVectorStore(
             db_path=settings.MILVUS_LITE_PATH,
             dim=settings.EMBEDDING_DIMENSION

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, AuthUser
 from app.core.config import settings
 from app.models.chat import ChatSession, ChatMessage, MessageRole
 from app.models.knowledge_base import KnowledgeBase
@@ -22,7 +22,7 @@ async def create_session(
     kb_id: str,
     data: ChatSessionCreate,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user: AuthUser = Depends(get_current_user)
 ):
     kb = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
@@ -34,7 +34,7 @@ async def create_session(
     session = ChatSession(
         kb_id=kb_id,
         org_id=user.org_id,
-        created_by=user.id,
+        created_by=user.user_id,
         title=data.title or "新对话"
     )
     db.add(session)
@@ -48,7 +48,7 @@ async def chat(
     kb_id: str,
     data: ChatMessageRequest,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user: AuthUser = Depends(get_current_user)
 ):
     kb = db.query(KnowledgeBase).filter(
         KnowledgeBase.id == kb_id,
@@ -68,7 +68,7 @@ async def chat(
         session = ChatSession(
             kb_id=kb_id,
             org_id=user.org_id,
-            created_by=user.id,
+            created_by=user.user_id,
             title=data.message[:20] + "..."
         )
         db.add(session)
@@ -139,7 +139,7 @@ async def chat(
 async def get_messages(
     session_id: str,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user: AuthUser = Depends(get_current_user)
 ):
     session = db.query(ChatSession).filter(
         ChatSession.id == session_id,

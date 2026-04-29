@@ -1,7 +1,4 @@
 import type { 
-  Task, 
-  CreateTaskInput, 
-  UpdateTaskInput,
   KnowledgeBase,
   CreateKnowledgeBaseInput,
   UpdateKnowledgeBaseInput,
@@ -25,20 +22,16 @@ export class ApiError extends Error {
 }
 
 /**
- * 带认证的 fetch 封装
+ * 基础 fetch 封装
  */
-export async function fetchWithAuth<T>(
+export async function fetchAPI<T>(
   endpoint: string,
-  getToken: () => Promise<string | null>,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = await getToken();
-  
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
       ...options.headers,
     },
   });
@@ -56,97 +49,40 @@ export async function fetchWithAuth<T>(
 }
 
 // ============================================
-// 任务相关 API
-// ============================================
-
-export async function getTasks(
-  getToken: () => Promise<string | null>
-): Promise<Task[]> {
-  return fetchWithAuth<Task[]>('/api/tasks', getToken);
-}
-
-export async function getTask(
-  getToken: () => Promise<string | null>,
-  taskId: string
-): Promise<Task> {
-  return fetchWithAuth<Task>(`/api/tasks/${taskId}`, getToken);
-}
-
-export async function createTask(
-  getToken: () => Promise<string | null>,
-  task: CreateTaskInput
-): Promise<Task> {
-  return fetchWithAuth<Task>('/api/tasks', getToken, {
-    method: 'POST',
-    body: JSON.stringify(task),
-  });
-}
-
-export async function updateTask(
-  getToken: () => Promise<string | null>,
-  taskId: string,
-  task: UpdateTaskInput
-): Promise<Task> {
-  return fetchWithAuth<Task>(`/api/tasks/${taskId}`, getToken, {
-    method: 'PUT',
-    body: JSON.stringify(task),
-  });
-}
-
-export async function deleteTask(
-  getToken: () => Promise<string | null>,
-  taskId: string
-): Promise<void> {
-  return fetchWithAuth<void>(`/api/tasks/${taskId}`, getToken, {
-    method: 'DELETE',
-  });
-}
-
-// ============================================
 // 知识库相关 API
 // ============================================
 
 const KB_BASE = '/api/v1/knowledge-bases';
 
-export async function getKnowledgeBases(
-  getToken: () => Promise<string | null>
-): Promise<ListResponse<KnowledgeBase>> {
-  return fetchWithAuth<ListResponse<KnowledgeBase>>(KB_BASE, getToken);
+export async function getKnowledgeBases(): Promise<ListResponse<KnowledgeBase>> {
+  return fetchAPI<ListResponse<KnowledgeBase>>(KB_BASE);
 }
 
-export async function getKnowledgeBase(
-  getToken: () => Promise<string | null>,
-  kbId: string
-): Promise<KnowledgeBase> {
-  return fetchWithAuth<KnowledgeBase>(`${KB_BASE}/${kbId}`, getToken);
+export async function getKnowledgeBase(kbId: string): Promise<KnowledgeBase> {
+  return fetchAPI<KnowledgeBase>(`${KB_BASE}/${kbId}`);
 }
 
 export async function createKnowledgeBase(
-  getToken: () => Promise<string | null>,
   data: CreateKnowledgeBaseInput
 ): Promise<KnowledgeBase> {
-  return fetchWithAuth<KnowledgeBase>(KB_BASE, getToken, {
+  return fetchAPI<KnowledgeBase>(KB_BASE, {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
 export async function updateKnowledgeBase(
-  getToken: () => Promise<string | null>,
   kbId: string,
   data: UpdateKnowledgeBaseInput
 ): Promise<KnowledgeBase> {
-  return fetchWithAuth<KnowledgeBase>(`${KB_BASE}/${kbId}`, getToken, {
+  return fetchAPI<KnowledgeBase>(`${KB_BASE}/${kbId}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
 }
 
-export async function deleteKnowledgeBase(
-  getToken: () => Promise<string | null>,
-  kbId: string
-): Promise<void> {
-  return fetchWithAuth<void>(`${KB_BASE}/${kbId}`, getToken, {
+export async function deleteKnowledgeBase(kbId: string): Promise<void> {
+  return fetchAPI<void>(`${KB_BASE}/${kbId}`, {
     method: 'DELETE',
   });
 }
@@ -155,22 +91,11 @@ export async function deleteKnowledgeBase(
 // 文档相关 API
 // ============================================
 
-export async function getDocuments(
-  getToken: () => Promise<string | null>,
-  kbId: string
-): Promise<ListResponse<Document>> {
-  return fetchWithAuth<ListResponse<Document>>(
-    `${KB_BASE}/${kbId}/documents`,
-    getToken
-  );
+export async function getDocuments(kbId: string): Promise<ListResponse<Document>> {
+  return fetchAPI<ListResponse<Document>>(`${KB_BASE}/${kbId}/documents`);
 }
 
-export async function uploadDocument(
-  getToken: () => Promise<string | null>,
-  kbId: string,
-  file: File
-): Promise<Document> {
-  const token = await getToken();
+export async function uploadDocument(kbId: string, file: File): Promise<Document> {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -178,9 +103,6 @@ export async function uploadDocument(
     `${API_URL}${KB_BASE}/${kbId}/documents/upload`,
     {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
       body: formData,
     }
   );
@@ -193,16 +115,10 @@ export async function uploadDocument(
   return response.json();
 }
 
-export async function deleteDocument(
-  getToken: () => Promise<string | null>,
-  kbId: string,
-  docId: string
-): Promise<void> {
-  return fetchWithAuth<void>(
-    `${KB_BASE}/${kbId}/documents/${docId}`,
-    getToken,
-    { method: 'DELETE' }
-  );
+export async function deleteDocument(kbId: string, docId: string): Promise<void> {
+  return fetchAPI<void>(`${KB_BASE}/${kbId}/documents/${docId}`, {
+    method: 'DELETE',
+  });
 }
 
 // ============================================
@@ -229,26 +145,15 @@ export interface ChatMessageResponse {
 }
 
 export async function sendChatMessage(
-  getToken: () => Promise<string | null>,
   kbId: string,
   data: ChatMessageRequest
 ): Promise<ChatMessageResponse> {
-  return fetchWithAuth<ChatMessageResponse>(
-    `${KB_BASE}/${kbId}/chat`,
-    getToken,
-    {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }
-  );
+  return fetchAPI<ChatMessageResponse>(`${KB_BASE}/${kbId}/chat`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
 
-export async function getChatMessages(
-  getToken: () => Promise<string | null>,
-  sessionId: string
-): Promise<ChatMessageResponse[]> {
-  return fetchWithAuth<ChatMessageResponse[]>(
-    `/api/v1/chat-sessions/${sessionId}/messages`,
-    getToken
-  );
+export async function getChatMessages(sessionId: string): Promise<ChatMessageResponse[]> {
+  return fetchAPI<ChatMessageResponse[]>(`/api/v1/chat-sessions/${sessionId}/messages`);
 }

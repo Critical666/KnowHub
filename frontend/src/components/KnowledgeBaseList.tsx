@@ -1,64 +1,95 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, Card, Button, Modal, Form, Input, message } from 'antd';
-import { PlusOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
-
-// 模拟知识库数据
-const mockKnowledgeBases = [
-  {
-    id: '1',
-    name: '产品文档',
-    description: '包含产品规格、用户手册等技术文档',
-    document_count: 12,
-    total_chunks: 156,
-    org_id: '1',
-    created_by: '1',
-    status: 'active',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01'
-  },
-  {
-    id: '2',
-    name: '销售资料',
-    description: '销售话术、客户案例、竞品分析',
-    document_count: 8,
-    total_chunks: 89,
-    org_id: '1',
-    created_by: '1',
-    status: 'active',
-    created_at: '2024-01-02',
-    updated_at: '2024-01-02'
-  }
-];
+import { List, Card, Button, Modal, Form, Input, message, Upload } from 'antd';
+import { PlusOutlined, MessageOutlined, DeleteOutlined, UploadOutlined, FileOutlined } from '@ant-design/icons';
+import { getKnowledgeBases, createKnowledgeBase, deleteKnowledgeBase, uploadDocument, getDocuments } from '../services/api';
 
 const KnowledgeBaseList = () => {
-  const [kbs, setKbs] = useState(mockKnowledgeBases);
-  const [loading, setLoading] = useState(false);
+  const [kbs, setKbs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedKb, setSelectedKb] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  const handleCreate = async (values: { name: string; description?: string }) => {
-    const newKB = {
-      id: Date.now().toString(),
-      ...values,
-      org_id: '1',
-      created_by: '1',
-      status: 'active',
-      document_count: 0,
-      total_chunks: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    setKbs(prev => [newKB, ...prev]);
-    message.success('创建成功');
-    setIsModalOpen(false);
-    form.resetFields();
+  // 获取知识库列表
+  const fetchKnowledgeBases = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getKnowledgeBases();
+      setKbs(response.items);
+    } catch (error) {
+      message.error('获取知识库列表失败');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchKnowledgeBases();
+  }, [fetchKnowledgeBases]);
+
+  // 创建知识库
+  const handleCreate = async (values) => {
+    try {
+      await createKnowledgeBase(values);
+      message.success('创建成功');
+      setIsModalOpen(false);
+      form.resetFields();
+      fetchKnowledgeBases();
+    } catch (error) {
+      message.error('创建失败');
+      console.error(error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setKbs(prev => prev.filter(kb => kb.id !== id));
-    message.success('删除成功');
+  // 删除知识库
+  const handleDelete = async (id) => {
+    try {
+      await deleteKnowledgeBase(id);
+      message.success('删除成功');
+      fetchKnowledgeBases();
+    } catch (error) {
+      message.error('删除失败');
+      console.error(error);
+    }
+  };
+
+  // 查看文档列表
+  const handleViewDocs = async (kb) => {
+    setSelectedKb(kb);
+    setIsDocModalOpen(true);
+    try {
+      const response = await getDocuments(kb.id);
+      setDocuments(response.items);
+    } catch (error) {
+      message.error('获取文档列表失败');
+      console.error(error);
+    }
+  };
+
+  // 上传文档
+  const handleUpload = async (file, kbId) => {
+    setUploadLoading(true);
+    try {
+      await uploadDocument(kbId, file);
+      message.success('上传成功');
+      // 刷新文档列表
+      const response = await getDocuments(kbId);
+      setDocuments(response.items);
+      // 刷新知识库列表以更新文档计数
+      fetchKnowledgeBases();
+    } catch (error) {
+      message.error('上传失败');
+      console.error(error);
+    } finally {
+      setUploadLoading(false);
+    }
+    return false; // 阻止默认上传行为
   };
 
   return (
@@ -76,6 +107,7 @@ const KnowledgeBaseList = () => {
       <List
         grid={{ gutter: 16, column: 3 }}
         dataSource={kbs}
+        loading={loading}
         renderItem={(kb) => (
           <List.Item>
             <Card
@@ -88,6 +120,12 @@ const KnowledgeBaseList = () => {
                   对话
                 </Button>,
                 <Button
+                  icon={<FileOutlined />}
+                  onClick={() => handleViewDocs(kb)}
+                >
+                  文档({kb.document_count})
+                </Button>,
+                <Button
                   danger
                   icon={<DeleteOutlined />}
                   onClick={() => handleDelete(kb.id)}
@@ -97,13 +135,13 @@ const KnowledgeBaseList = () => {
               ]}
             >
               <p>{kb.description}</p>
-              <p>文档数: {kb.document_count}</p>
               <p>分块数: {kb.total_chunks}</p>
             </Card>
           </List.Item>
         )}
       />
 
+      {/* 新建知识库弹窗 */}
       <Modal
         title="新建知识库"
         open={isModalOpen}
@@ -122,6 +160,43 @@ const KnowledgeBaseList = () => {
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 文档管理弹窗 */}
+      <Modal
+        title={`${selectedKb?.name} - 文档管理`}
+        open={isDocModalOpen}
+        onCancel={() => setIsDocModalOpen(false)}
+        footer={null}
+        width={700}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Upload
+            beforeUpload={(file) => handleUpload(file, selectedKb?.id)}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />} loading={uploadLoading}>
+              上传文档
+            </Button>
+          </Upload>
+          <span style={{ marginLeft: 8, color: '#999', fontSize: 12 }}>
+            支持: txt, md, pdf, docx, doc (最大50MB)
+          </span>
+        </div>
+        
+        <List
+          dataSource={documents}
+          renderItem={(doc) => (
+            <List.Item>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <span>{doc.filename}</span>
+                <span style={{ color: '#999' }}>
+                  {(doc.file_size / 1024).toFixed(1)} KB | {doc.status}
+                </span>
+              </div>
+            </List.Item>
+          )}
+        />
       </Modal>
     </div>
   );

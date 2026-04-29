@@ -62,9 +62,6 @@ const HomePage = () => {
               立即体验
               <ArrowRightOutlined />
             </Link>
-            <Link to="/dashboard" className="home-hero__btn home-hero__btn--secondary">
-              任务看板
-            </Link>
           </div>
         </div>
       </section>

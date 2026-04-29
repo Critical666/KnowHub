@@ -4,35 +4,6 @@
  */
 
 // ============================================
-// 任务相关类型
-// ============================================
-
-export type TaskStatus = 'pending' | 'started' | 'completed';
-
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  status: TaskStatus;
-  org_id: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreateTaskInput {
-  title: string;
-  description?: string;
-  status?: TaskStatus;
-}
-
-export interface UpdateTaskInput {
-  title?: string;
-  description?: string;
-  status?: TaskStatus;
-}
-
-// ============================================
 // 知识库相关类型
 // ============================================
 
@@ -124,27 +95,10 @@ export interface ListResponse<T> {
 // 组件 Props 类型
 // ============================================
 
-export interface TaskColumnProps {
-  status: TaskStatus;
-  tasks: Task[];
-  onEdit: ((task: Task) => void) | null;
-  onDelete: ((taskId: string) => void) | null;
-}
-
-export interface TaskCardProps {
-  task: Task;
-  onEdit?: (task: Task) => void;
-  onDelete?: (taskId: string) => void;
-}
-
-export interface KanbanBoardProps {
-  tasks: Task[];
-  setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-  getToken: () => Promise<string | null>;
-}
-
-export interface TaskFormProps {
-  task?: Task;
-  onSubmit: (data: CreateTaskInput) => void;
-  onCancel: () => void;
+export interface KnowledgeBaseCardProps {
+  kb: KnowledgeBase;
+  onEdit?: (kb: KnowledgeBase) => void;
+  onDelete?: (id: string) => void;
+  onChat?: (id: string) => void;
+  onViewDocs?: (kb: KnowledgeBase) => void;
 }
