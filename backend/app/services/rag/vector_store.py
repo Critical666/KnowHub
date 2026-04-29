@@ -1,5 +1,5 @@
 from pymilvus import MilvusClient
-from typing import Collection, List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any
 import os
 import logging
 
@@ -26,11 +26,11 @@ class MilvusVectorStore:
         self.client = MilvusClient(db_path)
         logger.info(f"Milvus Lite initialized: {db_path}")
 
-    def _get_collention_name(self, kb_id:str) -> str:
-        "生成Collention名称"
+    def _get_collection_name(self, kb_id:str) -> str:
+        """生成Collection名称"""
         return f"kb_{kb_id}"
 
-    def create_collention(self, kb_id: str) -> bool:
+    def create_collection(self, kb_id: str) -> bool:
         """
         为知识库创建Collection
 
@@ -41,23 +41,23 @@ class MilvusVectorStore:
             是否成功
         """
 
-        collection_name = self._get_collention_name(kb_id)
+        collection_name = self._get_collection_name(kb_id)
 
         # 检查是否已经存在
-        if self.client.has_collention(collection_name):
+        if self.client.has_collection(collection_name):
             logger.info(f"Collection {collection_name} already exists")
             return True
         
         # 创建Collection （注意 Milvus Lite简化了Schema定义）
-        self.client.create_collention(
-            collection_name = collection_name,
-            dimension = self.dim,
-            metric_type = "COSINE",
-            primary_field = "id",
-            vector_field = "embedding"
+        self.client.create_collection(
+            collection_name=collection_name,
+            dimension=self.dim,
+            metric_type="COSINE",
+            primary_field="id",
+            vector_field="embedding"
         )
 
-        logger.info(f"Create colloction {collection_name} with dim = {self.dim}")
+        logger.info(f"Created collection {collection_name} with dim = {self.dim}")
         return True
     
     def insert_chunks(self, kb_id:str, chunks: List[Dict[str, Any]]) -> None:
@@ -78,18 +78,18 @@ class MilvusVectorStore:
             logger.warning("No chunks to insert")
             return
         
-        collection_name = self._get_collention_name(kb_id)
+        collection_name = self._get_collection_name(kb_id)
 
         # 确保Collection存在
         if not self.client.has_collection(collection_name):
-            self.create_collention(kb_id)
+            self.create_collection(kb_id)
 
         # 准备数据 （注意 Milvus Lite采用了更加简单的格式）
         data = []
         for chunk in chunks:
             data.append({
                 "id": chunk["id"],
-                "doc_id": chunk["doc_id"] ,
+                "doc_id": chunk["doc_id"],
                 "chunk_index": chunk["chunk_index"],
                 "content": chunk["content"], 
                 "metadata": chunk.get("metadata", {}), 
@@ -109,7 +109,7 @@ class MilvusVectorStore:
         doc_ids: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """
-            向量相似度检索
+        向量相似度检索
 
         Args:
             kb_id: 知识库ID
@@ -121,9 +121,9 @@ class MilvusVectorStore:
         Returns:
             检索结果列表
         """
-        collection_name = self._get_collention_name(kb_id)
+        collection_name = self._get_collection_name(kb_id)
         
-        # 检查collention是否存在
+        # 检查collection是否存在
         if not self.client.has_collection(collection_name):
             logger.warning(f"Collection {collection_name} does not exist")
             return []
