@@ -28,7 +28,9 @@ class MilvusVectorStore:
 
     def _get_collection_name(self, kb_id:str) -> str:
         """生成Collection名称"""
-        return f"kb_{kb_id}"
+        # 移除 UUID 中的连字符，Milvus 只支持数字、字母和下划线
+        safe_kb_id = kb_id.replace("-", "_")
+        return f"kb_{safe_kb_id}"
 
     def create_collection(self, kb_id: str) -> bool:
         """
