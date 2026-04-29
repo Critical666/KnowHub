@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { SignedIn, SignedOut, useUser, useAuth, UserButton, OrganizationSwitcher } from '@clerk/clerk-react';
 import { Layout, Menu, Button } from 'antd';
 import { DatabaseOutlined, ProjectOutlined } from '@ant-design/icons';
@@ -17,7 +17,7 @@ function UnsignedHeader() {
   const navigate = useNavigate();
 
   return (
-    <Header style={{ display: 'flex', alignItems: 'center', padding: '0 24px' }}>
+    <Header style={{ display: 'flex', alignItems: 'center', padding: '0 24px', background: '#001529' }}>
       <div style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', marginRight: '48px' }}>
         <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>TaskBoard</Link>
       </div>
@@ -99,8 +99,8 @@ function SignedInHeader() {
   );
 }
 
-// 首页组件 - 根据登录状态显示不同内容
-function HomeRoute() {
+// 首页布局
+function HomeLayout() {
   const { isSignedIn } = useUser();
 
   if (isSignedIn) {
@@ -108,16 +108,65 @@ function HomeRoute() {
   }
 
   return (
-    <>
+    <Layout style={{ minHeight: '100vh' }}>
       <UnsignedHeader />
       <Content>
         <HomePage />
       </Content>
-    </>
+    </Layout>
   );
 }
 
-// Dashboard 包装组件，用于传递 getToken
+// 认证页面布局
+function AuthLayout() {
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <UnsignedHeader />
+      <Content
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+        }}
+      >
+        <Outlet />
+      </Content>
+    </Layout>
+  );
+}
+
+// 定价页面布局
+function PricingLayout() {
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <SignedIn>
+        <SignedInHeader />
+      </SignedIn>
+      <SignedOut>
+        <UnsignedHeader />
+      </SignedOut>
+      <Content style={{ background: '#f0f2f5', padding: '24px' }}>
+        <PricingPage />
+      </Content>
+    </Layout>
+  );
+}
+
+// 主布局（已登录）
+function MainLayout() {
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <SignedInHeader />
+      <Content style={{ background: '#f0f2f5' }}>
+        <Outlet />
+      </Content>
+    </Layout>
+  );
+}
+
+// Dashboard 包装组件
 function DashboardPageWrapper() {
   const { getToken } = useAuth();
   return <DashboardPage getToken={getToken} />;
@@ -125,113 +174,29 @@ function DashboardPageWrapper() {
 
 function App() {
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Routes>
-        {/* 未登录路由 */}
-        <Route path="/" element={<HomeRoute />} />
-        <Route
-          path="/sign-in"
-          element={
-            <>
-              <UnsignedHeader />
-              <Content
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
-                  minHeight: 'calc(100vh - 64px)',
-                }}
-              >
-                <SignInPage />
-              </Content>
-            </>
-          }
-        />
-        <Route
-          path="/sign-up"
-          element={
-            <>
-              <UnsignedHeader />
-              <Content
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px',
-                  background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
-                  minHeight: 'calc(100vh - 64px)',
-                }}
-              >
-                <SignUpPage />
-              </Content>
-            </>
-          }
-        />
-        {/* 定价页面 - 公共访问 */}
-        <Route
-          path="/pricing"
-          element={
-            <>
-              <SignedIn>
-                <SignedInHeader />
-              </SignedIn>
-              <SignedOut>
-                <UnsignedHeader />
-              </SignedOut>
-              <Content
-                style={{
-                  background: '#f0f2f5',
-                  minHeight: 'calc(100vh - 64px)',
-                  padding: '24px',
-                }}
-              >
-                <PricingPage />
-              </Content>
-            </>
-          }
-        />
-
-        {/* 已登录路由 */}
-        <Route
-          path="/dashboard"
-          element={
-            <SignedIn>
-              <SignedInHeader />
-              <Content style={{ background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
-                <DashboardPageWrapper />
-              </Content>
-            </SignedIn>
-          }
-        />
-        <Route
-          path="/knowledge"
-          element={
-            <SignedIn>
-              <SignedInHeader />
-              <Content style={{ background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
-                <KnowledgeBaseList />
-              </Content>
-            </SignedIn>
-          }
-        />
-        <Route
-          path="/knowledge/:kbId/chat"
-          element={
-            <SignedIn>
-              <SignedInHeader />
-              <Content style={{ background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
-                <ChatInterface />
-              </Content>
-            </SignedIn>
-          }
-        />
-
-        {/* 默认重定向 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      {/* 首页 */}
+      <Route path="/" element={<HomeLayout />} />
+      
+      {/* 认证页面 */}
+      <Route element={<AuthLayout />}>
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
+      </Route>
+      
+      {/* 定价页面 */}
+      <Route path="/pricing" element={<PricingLayout />} />
+      
+      {/* 已登录页面 */}
+      <Route element={<MainLayout />}>
+        <Route path="/dashboard" element={<DashboardPageWrapper />} />
+        <Route path="/knowledge" element={<KnowledgeBaseList />} />
+        <Route path="/knowledge/:kbId/chat" element={<ChatInterface />} />
+      </Route>
+      
+      {/* 默认重定向 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
