@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
-import { SignedIn, SignedOut, useUser, UserButton, OrganizationSwitcher } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, useUser, useAuth, UserButton, OrganizationSwitcher } from '@clerk/clerk-react';
 import { Layout, Menu, Button } from 'antd';
 import { DatabaseOutlined, ProjectOutlined } from '@ant-design/icons';
 import HomePage from './pages/HomePage';
@@ -117,6 +117,12 @@ function HomeRoute() {
   );
 }
 
+// Dashboard 包装组件，用于传递 getToken
+function DashboardPageWrapper() {
+  const { getToken } = useAuth();
+  return <DashboardPage getToken={getToken} />;
+}
+
 function App() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -190,7 +196,7 @@ function App() {
             <SignedIn>
               <SignedInHeader />
               <Content style={{ background: '#f0f2f5', minHeight: 'calc(100vh - 64px)' }}>
-                <DashboardPage />
+                <DashboardPageWrapper />
               </Content>
             </SignedIn>
           }

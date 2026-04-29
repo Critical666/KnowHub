@@ -1,50 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useAuth, useOrganization, CreateOrganization } from '@clerk/clerk-react';
-import { getTasks } from '../services/api';
+import { useOrganization, CreateOrganization } from '@clerk/clerk-react';
+import { useTasks } from '../hooks';
 import KanbanBoard from '../components/KanbanBoard';
-import type { Task } from '../types';
 
-const DashboardPage = () => {
-  const { getToken } = useAuth();
+interface DashboardPageProps {
+  getToken: () => Promise<string | null>;
+}
+
+const DashboardPage = ({ getToken }: DashboardPageProps) => {
   const { organization } = useOrganization({ memberships: { infinite: true } });
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { tasks, loading, error, refetch, create, update, remove } = useTasks(getToken);
 
   const memberCount = organization?.membersCount ?? 0;
-  const orgId = organization?.id;
-
-  useEffect(() => {
-    if (!orgId) {
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getTasks(getToken);
-        if (!cancelled) {
-          setTasks(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [orgId, getToken]);
 
   if (!organization) {
     return (
@@ -76,9 +42,17 @@ const DashboardPage = () => {
         <div className="card-error">
           <p className="text-error text-error-title">加载失败</p>
           <p className="text-error text-error-message">{error}</p>
+          <button className="btn btn-primary" onClick={refetch}>
+            重试
+          </button>
         </div>
       ) : (
-        <KanbanBoard tasks={tasks} setTasks={setTasks} getToken={getToken} />
+        <KanbanBoard
+          tasks={tasks}
+          onCreate={create}
+          onUpdate={update}
+          onDelete={remove}
+        />
       )}
     </div>
   );

@@ -1,56 +1,22 @@
-import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { Input, Button, List, Card, message } from 'antd';
+import { Input, Button, List, Card } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import { sendChatMessage } from '../services/api';
-import type { Message, ChatMessageResponse } from '../types';
+import { useChat } from '../hooks';
 
 const ChatInterface = () => {
   const { kbId } = useParams<{ kbId: string }>();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const { getToken } = useAuth();
 
-  const handleSend = useCallback(async () => {
-    if (!input.trim() || !kbId) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
-
-    try {
-      const response: ChatMessageResponse = await sendChatMessage(getToken, kbId, {
-        message: input,
-      });
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: response.id,
-          role: 'assistant',
-          content: response.content,
-          sources: response.sources,
-        },
-      ]);
-    } catch (error) {
-      message.error('发送消息失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [input, kbId, getToken]);
+  const { messages, loading, sendMessage, input, setInput } = useExtendedChat({
+    kbId: kbId || '',
+    getToken,
+  });
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      sendMessage(input);
     }
   };
 
@@ -104,7 +70,7 @@ const ChatInterface = () => {
           <Button
             type="primary"
             icon={<SendOutlined />}
-            onClick={handleSend}
+            onClick={() => sendMessage(input)}
             loading={loading}
           >
             发送
@@ -114,5 +80,40 @@ const ChatInterface = () => {
     </div>
   );
 };
+
+// 扩展 useChat hook 以包含 input 状态
+import { useState } from 'react';
+
+interface UseExtendedChatOptions {
+  kbId: string;
+  getToken: () => Promise<string | null>;
+}
+
+interface UseExtendedChatReturn {
+  messages: ReturnType<typeof useChat>['messages'];
+  loading: boolean;
+  sendMessage: (content: string) => Promise<void>;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+}
+
+function useExtendedChat(options: UseExtendedChatOptions): UseExtendedChatReturn {
+  const [input, setInput] = useState('');
+  const chat = useChat(options);
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
+    await chat.sendMessage(content);
+    setInput('');
+  };
+
+  return {
+    messages: chat.messages,
+    loading: chat.loading,
+    sendMessage,
+    input,
+    setInput,
+  };
+}
 
 export default ChatInterface;

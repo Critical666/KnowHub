@@ -1,47 +1,25 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { List, Card, Button, Modal, Form, Input, message } from 'antd';
 import { PlusOutlined, MessageOutlined } from '@ant-design/icons';
-import {
-  getKnowledgeBases,
-  createKnowledgeBase,
-} from '../services/api';
-import type { KnowledgeBase, CreateKnowledgeBaseInput } from '../types';
+import { useKnowledgeBases } from '../hooks';
 
 const KnowledgeBaseList = () => {
-  const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form] = Form.useForm();
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  const { knowledgeBases, loading, create } = useKnowledgeBases(getToken);
 
-  const fetchKnowledgeBases = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await getKnowledgeBases(getToken);
-      setKbs(response.items);
-    } catch (error) {
-      console.error('API Error:', error);
-      message.error('获取知识库列表失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [getToken]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form] = Form.useForm();
 
-  useEffect(() => {
-    fetchKnowledgeBases();
-  }, [fetchKnowledgeBases]);
-
-  const handleCreate = async (values: CreateKnowledgeBaseInput) => {
-    try {
-      await createKnowledgeBase(getToken, values);
+  const handleCreate = async (values: { name: string; description?: string }) => {
+    const result = await create(values);
+    if (result) {
       message.success('创建成功');
       setIsModalOpen(false);
       form.resetFields();
-      fetchKnowledgeBases();
-    } catch (error) {
+    } else {
       message.error('创建失败');
     }
   };
@@ -68,7 +46,7 @@ const KnowledgeBaseList = () => {
 
       <List
         grid={{ gutter: 16, column: 3 }}
-        dataSource={kbs}
+        dataSource={knowledgeBases}
         renderItem={(kb) => (
           <List.Item>
             <Card
