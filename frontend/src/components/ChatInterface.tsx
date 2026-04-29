@@ -1,22 +1,52 @@
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
 import { Input, Button, List, Card } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import { useChat } from '../hooks';
+
+// 模拟消息数据
+const mockMessages = [
+  {
+    id: '1',
+    role: 'assistant',
+    content: '您好！我是您的 AI 助手。我可以帮您查询知识库中的信息。请告诉我您想了解什么？'
+  }
+];
 
 const ChatInterface = () => {
   const { kbId } = useParams<{ kbId: string }>();
-  const { getToken } = useAuth();
+  const [messages, setMessages] = useState(mockMessages);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const { messages, loading, sendMessage, input, setInput } = useExtendedChat({
-    kbId: kbId || '',
-    getToken,
-  });
+  const handleSend = useCallback(async () => {
+    if (!input.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    // 模拟 AI 回复
+    setTimeout(() => {
+      const assistantMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `这是关于您提问 "${input}" 的回答。\n\n基于知识库中的文档，我找到了以下相关信息...\n\n（这是模拟回复，实际应调用后端 API）`
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+      setLoading(false);
+    }, 1000);
+  }, [input]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(input);
+      handleSend();
     }
   };
 
@@ -33,7 +63,7 @@ const ChatInterface = () => {
         <div style={{ flex: 1, overflow: 'auto', marginBottom: 16 }}>
           <List
             dataSource={messages}
-            renderItem={(msg) => (
+            renderItem={(msg: any) => (
               <List.Item
                 style={{
                   justifyContent:
@@ -50,6 +80,7 @@ const ChatInterface = () => {
                       msg.role === 'user' ? '#1890ff' : '#f0f0f0',
                     color: msg.role === 'user' ? 'white' : 'black',
                     wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap'
                   }}
                 >
                   {msg.content}
@@ -70,7 +101,7 @@ const ChatInterface = () => {
           <Button
             type="primary"
             icon={<SendOutlined />}
-            onClick={() => sendMessage(input)}
+            onClick={handleSend}
             loading={loading}
           >
             发送
@@ -80,40 +111,5 @@ const ChatInterface = () => {
     </div>
   );
 };
-
-// 扩展 useChat hook 以包含 input 状态
-import { useState } from 'react';
-
-interface UseExtendedChatOptions {
-  kbId: string;
-  getToken: () => Promise<string | null>;
-}
-
-interface UseExtendedChatReturn {
-  messages: ReturnType<typeof useChat>['messages'];
-  loading: boolean;
-  sendMessage: (content: string) => Promise<void>;
-  input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-}
-
-function useExtendedChat(options: UseExtendedChatOptions): UseExtendedChatReturn {
-  const [input, setInput] = useState('');
-  const chat = useChat(options);
-
-  const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
-    await chat.sendMessage(content);
-    setInput('');
-  };
-
-  return {
-    messages: chat.messages,
-    loading: chat.loading,
-    sendMessage,
-    input,
-    setInput,
-  };
-}
 
 export default ChatInterface;

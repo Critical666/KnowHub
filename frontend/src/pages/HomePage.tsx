@@ -1,33 +1,40 @@
 import { Link } from 'react-router-dom';
-import { SignedIn, SignedOut, useOrganization, CreateOrganization } from '@clerk/clerk-react';
 import { 
-  ProjectOutlined, 
   DatabaseOutlined, 
+  FileTextOutlined, 
   RobotOutlined,
-  ArrowRightOutlined
+  ArrowRightOutlined,
+  CloudUploadOutlined,
+  SearchOutlined,
+  MessageOutlined
 } from '@ant-design/icons';
 
 const features = [
   {
-    icon: <ProjectOutlined />,
-    title: '任务看板',
-    description: '直观的看板视图，轻松管理任务状态。支持拖拽排序、优先级标记、团队协作。'
+    icon: <CloudUploadOutlined />,
+    title: '文档上传与管理',
+    description: '支持 PDF、Word、TXT、Markdown 等多种格式。自动文档解析与分段，安全的文件存储与管理。'
   },
   {
     icon: <DatabaseOutlined />,
-    title: '知识库',
-    description: '集中管理企业文档，支持多种格式上传。智能分类、快速检索、权限控制。'
+    title: '智能知识库构建',
+    description: '基于 BGE Embedding 的向量检索，Milvus 向量数据库存储，高效的语义相似度匹配。'
   },
   {
     icon: <RobotOutlined />,
-    title: 'AI 助手',
-    description: '基于 RAG 技术的智能问答，让 AI 帮你从知识库中快速找到答案。'
+    title: 'AI 智能问答',
+    description: '基于 Kimi 大模型的智能回答，上下文感知的对话体验，答案可追溯原文出处。'
   }
 ];
 
-const HomePage = () => {
-  const { organization } = useOrganization();
+const techStack = [
+  { name: 'FastAPI', desc: '高性能后端框架' },
+  { name: 'React', desc: '现代化前端' },
+  { name: 'Milvus', desc: '向量数据库' },
+  { name: 'Kimi', desc: '大语言模型' },
+];
 
+const HomePage = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -35,73 +42,30 @@ const HomePage = () => {
         <div className="home-hero__grid" />
         
         <div className="home-hero__content">
-          <SignedOut>
-            <div className="home-hero__badge">
-              <span className="home-hero__badge-dot" />
-              免费开始使用
-            </div>
-          </SignedOut>
+          <div className="home-hero__badge">
+            <span className="home-hero__badge-dot" />
+            基于 RAG 技术
+          </div>
           
           <h1 className="home-hero__title">
-            团队任务管理
-            <span className="home-hero__title-accent">化繁为简</span>
+            智能知识库
+            <span className="home-hero__title-accent">管理系统</span>
           </h1>
           
           <p className="home-hero__subtitle">
-            使用强大的任务看板和知识库，组织团队工作。
-            创建、分配并追踪任务，让 AI 助手帮你从文档中找到答案。
+            上传文档，构建知识库，让 AI 助手为您快速找到答案。
+            基于检索增强生成（RAG）技术的企业文档智能问答平台。
           </p>
 
-          <SignedOut>
-            <div className="home-hero__actions">
-              <Link to="/sign-up" className="home-hero__btn home-hero__btn--primary">
-                免费开始
-                <ArrowRightOutlined />
-              </Link>
-              <Link to="/sign-in" className="home-hero__btn home-hero__btn--secondary">
-                登录
-              </Link>
-            </div>
-          </SignedOut>
-
-          <SignedIn>
-            <div className="home-hero__signed-in">
-              {organization ? (
-                <Link to="/dashboard" className="home-hero__btn home-hero__btn--primary">
-                  进入任务看板
-                  <ArrowRightOutlined />
-                </Link>
-              ) : (
-                <div className="home-hero__org-card">
-                  <h3 className="home-hero__org-title">创建或加入组织</h3>
-                  <p className="home-hero__org-text">
-                    您需要创建或加入一个组织才能开始使用
-                  </p>
-                  <CreateOrganization 
-                    afterCreateOrganizationUrl="/dashboard"
-                    appearance={{
-                      elements: {
-                        rootBox: {
-                          width: '100%'
-                        },
-                        card: {
-                          background: 'transparent',
-                          boxShadow: 'none',
-                          border: '1px solid rgba(255,255,255,0.2)'
-                        },
-                        headerTitle: {
-                          color: 'white'
-                        },
-                        headerSubtitle: {
-                          color: '#94a3b8'
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </SignedIn>
+          <div className="home-hero__actions">
+            <Link to="/knowledge" className="home-hero__btn home-hero__btn--primary">
+              立即体验
+              <ArrowRightOutlined />
+            </Link>
+            <Link to="/dashboard" className="home-hero__btn home-hero__btn--secondary">
+              任务看板
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -109,9 +73,9 @@ const HomePage = () => {
       <section className="home-features">
         <div className="home-features__container">
           <div className="home-features__header">
-            <h2 className="home-features__title">强大功能，助力团队协作</h2>
+            <h2 className="home-features__title">核心功能</h2>
             <p className="home-features__subtitle">
-              集成任务管理、知识库和 AI 助手，打造高效团队工作流
+              完整的 RAG 解决方案，让文档管理和知识检索变得简单高效
             </p>
           </div>
 
@@ -131,10 +95,39 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Tech Stack Section */}
+      <section className="home-tech">
+        <div className="home-tech__container">
+          <h2 className="home-tech__title">技术架构</h2>
+          <div className="home-tech__grid">
+            {techStack.map((tech, index) => (
+              <div key={index} className="home-tech-item">
+                <div className="home-tech-item__name">{tech.name}</div>
+                <div className="home-tech-item__desc">{tech.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="home-cta">
+        <div className="home-cta__content">
+          <h2 className="home-cta__title">开始构建您的知识库</h2>
+          <p className="home-cta__subtitle">
+            无需登录，立即体验完整的 RAG 功能
+          </p>
+          <Link to="/knowledge" className="home-hero__btn home-hero__btn--primary">
+            开始使用
+            <ArrowRightOutlined />
+          </Link>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="home-footer">
         <p className="home-footer__text">
-          © 2026 TaskBoard. 让团队协作更高效。
+          © 2026 RAG知识库. 基于检索增强生成技术的企业文档智能问答平台。
         </p>
       </footer>
     </div>

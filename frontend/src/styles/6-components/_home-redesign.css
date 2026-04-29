@@ -304,6 +304,94 @@
 }
 
 /* ============================================
+   Tech Stack Section - 技术架构
+   ============================================ */
+
+.home-tech {
+  padding: var(--space-20) var(--space-6);
+  background: var(--bg-tertiary);
+}
+
+.home-tech__container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-tech__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-10);
+}
+
+.home-tech__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+@media (max-width: 768px) {
+  .home-tech__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.home-tech-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--transition-base);
+}
+
+.home-tech-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-300);
+}
+
+.home-tech-item__name {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--primary-600);
+  margin-bottom: var(--space-2);
+}
+
+.home-tech-item__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   CTA Section - 行动召唤
+   ============================================ */
+
+.home-cta {
+  padding: var(--space-20) var(--space-6);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  text-align: center;
+}
+
+.home-cta__content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.home-cta__title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: white;
+  margin: 0 0 var(--space-4);
+}
+
+.home-cta__subtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 var(--space-8);
+}
+
+/* ============================================
    Footer - 页脚
    ============================================ */
 
