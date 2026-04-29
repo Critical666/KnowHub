@@ -5,13 +5,12 @@ const SignInPage = () => {
     <div style={{ 
       width: '100%', 
       maxWidth: '400px',
-      margin: '0 auto'
+      margin: '0 auto',
+      padding: '20px'
     }}>
       <SignIn
-        routing="path"
-        path="/sign-in"
         signUpUrl="/sign-up"
-        afterSignInUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
             rootBox: {
