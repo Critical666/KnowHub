@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Critical666.github.io/RAGdemo",
+  "homepage": "https://critical666.github.io/KnowHub/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
