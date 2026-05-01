@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
 import { sendChatMessage, ApiError } from '../services/api';
-import type { Message, SourceItem } from '../types';
+import type { Message } from '../types';
 
 interface UseChatOptions {
   kbId: string;
-  getToken: () => Promise<string | null>;
 }
 
 interface UseChatReturn {
@@ -19,7 +18,7 @@ interface UseChatReturn {
  * 聊天功能 Hook
  */
 export function useChat(options: UseChatOptions): UseChatReturn {
-  const { kbId, getToken } = options;
+  const { kbId } = options;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +39,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
       setError(null);
 
       try {
-        const response = await sendChatMessage(getToken, kbId, {
+        const response = await sendChatMessage(kbId, {
           message: content.trim(),
         });
 
@@ -49,11 +48,11 @@ export function useChat(options: UseChatOptions): UseChatReturn {
           role: 'assistant',
           content: response.content,
           sources: response.sources?.map((s) => ({
-            docId: s.doc_id,
+            doc_id: s.doc_id,
             content: s.content,
             score: s.score,
-            chunkIndex: s.chunk_index,
-          })) as SourceItem[],
+            chunk_index: s.chunk_index,
+          })),
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
@@ -66,7 +65,7 @@ export function useChat(options: UseChatOptions): UseChatReturn {
         setLoading(false);
       }
     },
-    [kbId, getToken]
+    [kbId]
   );
 
   const clearMessages = useCallback(() => {

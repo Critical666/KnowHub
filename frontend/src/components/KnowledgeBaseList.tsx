@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { List, Card, Button, Modal, Form, Input, message, Upload, Alert, Spin } from 'antd';
 import { PlusOutlined, MessageOutlined, DeleteOutlined, UploadOutlined, FileOutlined } from '@ant-design/icons';
 import { getKnowledgeBases, createKnowledgeBase, deleteKnowledgeBase, uploadDocument, getDocuments } from '../services/api';
+import type { KnowledgeBase, Document } from '../types';
 
 const KnowledgeBaseList = () => {
-  const [kbs, setKbs] = useState([]);
+  const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedKb, setSelectedKb] = useState(null);
-  const [documents, setDocuments] = useState([]);
+  const [selectedKb, setSelectedKb] = useState<KnowledgeBase | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -38,7 +39,7 @@ const KnowledgeBaseList = () => {
   }, [fetchKnowledgeBases]);
 
   // 创建知识库
-  const handleCreate = async (values) => {
+  const handleCreate = async (values: { name: string; description?: string }) => {
     console.log('创建知识库，表单数据:', values);
     setCreateLoading(true);
     try {
@@ -48,7 +49,7 @@ const KnowledgeBaseList = () => {
       setIsModalOpen(false);
       form.resetFields();
       fetchKnowledgeBases();
-    } catch (error) {
+    } catch (error: any) {
       console.error('创建失败:', error);
       message.error('创建失败: ' + (error.message || '未知错误'));
     } finally {
@@ -57,19 +58,19 @@ const KnowledgeBaseList = () => {
   };
 
   // 删除知识库
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteKnowledgeBase(id);
       message.success('删除成功');
       fetchKnowledgeBases();
-    } catch (error) {
+    } catch (error: any) {
       message.error('删除失败: ' + (error.message || '未知错误'));
       console.error(error);
     }
   };
 
   // 查看文档列表
-  const handleViewDocs = async (kb) => {
+  const handleViewDocs = async (kb: KnowledgeBase) => {
     setSelectedKb(kb);
     setIsDocModalOpen(true);
     try {
@@ -82,7 +83,7 @@ const KnowledgeBaseList = () => {
   };
 
   // 上传文档
-  const handleUpload = async (file, kbId) => {
+  const handleUpload = async (file: File, kbId: string) => {
     setUploadLoading(true);
     const hide = message.loading('正在上传并处理文档，请稍候...', 0);
     try {
@@ -100,7 +101,7 @@ const KnowledgeBaseList = () => {
       setDocuments(response.items);
       // 刷新知识库列表以更新文档计数
       fetchKnowledgeBases();
-    } catch (error) {
+    } catch (error: any) {
       hide();
       if (error.name === 'AbortError') {
         message.warning('处理时间较长，请刷新页面查看结果');
@@ -225,7 +226,7 @@ const KnowledgeBaseList = () => {
       >
         <div style={{ marginBottom: 16 }}>
           <Upload
-            beforeUpload={(file) => handleUpload(file, selectedKb?.id)}
+            beforeUpload={(file) => selectedKb?.id ? handleUpload(file, selectedKb.id) : false}
             showUploadList={false}
           >
             <Button icon={<UploadOutlined />} loading={uploadLoading}>

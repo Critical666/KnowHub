@@ -1,21 +1,33 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Input, Button, List, Card, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import { sendChatMessage, getChatMessages } from '../services/api';
+import { sendChatMessage } from '../services/api';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: Array<{
+    doc_id: string;
+    content: string;
+    score: number;
+    chunk_index?: number;
+  }>;
+}
 
 const ChatInterface = () => {
   const { kbId } = useParams<{ kbId: string }>();
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   // 发送消息
   const handleSend = useCallback(async () => {
     if (!input.trim() || !kbId) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
@@ -36,9 +48,9 @@ const ChatInterface = () => {
         setSessionId(response.session_id);
       }
 
-      const assistantMessage = {
+      const assistantMessage: Message = {
         id: response.id,
-        role: response.role,
+        role: 'assistant',
         content: response.content,
         sources: response.sources,
       };

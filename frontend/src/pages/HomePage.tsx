@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom';
 import { 
   DatabaseOutlined, 
-  FileTextOutlined, 
   RobotOutlined,
   ArrowRightOutlined,
-  CloudUploadOutlined,
-  SearchOutlined,
-  MessageOutlined
+  CloudUploadOutlined
 } from '@ant-design/icons';
 
 const features = [

@@ -4,7 +4,7 @@ import type {
   UpdateKnowledgeBaseInput,
   Document,
   ListResponse 
-} from '@/types';
+} from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 

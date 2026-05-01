@@ -30,7 +30,6 @@ interface UseKnowledgeBasesReturn {
  * 知识库管理 Hook
  */
 export function useKnowledgeBases(
-  getToken: () => Promise<string | null>,
   options: UseKnowledgeBasesOptions = {}
 ): UseKnowledgeBasesReturn {
   const { enabled = true } = options;
@@ -44,7 +43,7 @@ export function useKnowledgeBases(
     setError(null);
 
     try {
-      const response = await getKnowledgeBases(getToken);
+      const response = await getKnowledgeBases();
       setKnowledgeBases(response.items);
     } catch (err) {
       const message =
@@ -54,7 +53,7 @@ export function useKnowledgeBases(
     } finally {
       setLoading(false);
     }
-  }, [getToken]);
+  }, []);
 
   useEffect(() => {
     if (enabled) {
@@ -65,7 +64,7 @@ export function useKnowledgeBases(
   const create = useCallback(
     async (data: CreateKnowledgeBaseInput): Promise<KnowledgeBase | null> => {
       try {
-        const newKB = await createKnowledgeBase(getToken, data);
+        const newKB = await createKnowledgeBase(data);
         setKnowledgeBases((prev) => [newKB, ...prev]);
         return newKB;
       } catch (err) {
@@ -76,7 +75,7 @@ export function useKnowledgeBases(
         return null;
       }
     },
-    [getToken]
+    []
   );
 
   const update = useCallback(
@@ -85,7 +84,7 @@ export function useKnowledgeBases(
       data: UpdateKnowledgeBaseInput
     ): Promise<KnowledgeBase | null> => {
       try {
-        const updatedKB = await updateKnowledgeBase(getToken, id, data);
+        const updatedKB = await updateKnowledgeBase(id, data);
         setKnowledgeBases((prev) =>
           prev.map((kb) => (kb.id === id ? updatedKB : kb))
         );
@@ -98,13 +97,13 @@ export function useKnowledgeBases(
         return null;
       }
     },
-    [getToken]
+    []
   );
 
   const remove = useCallback(
     async (id: string): Promise<boolean> => {
       try {
-        await deleteKnowledgeBase(getToken, id);
+        await deleteKnowledgeBase(id);
         setKnowledgeBases((prev) => prev.filter((kb) => kb.id !== id));
         return true;
       } catch (err) {
@@ -115,7 +114,7 @@ export function useKnowledgeBases(
         return false;
       }
     },
-    [getToken]
+    []
   );
 
   return {
