@@ -6,7 +6,7 @@ import type {
   ListResponse 
 } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://api.wuyuxuan.xyz';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.wuyuxuan.xyz';
 
 /**
  * API 错误类
