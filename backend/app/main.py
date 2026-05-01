@@ -12,13 +12,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 允许所有来源（开发环境）
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+allow_origins=[
+    "https://critical666.github.io",
+    "https://critical666.github.io/KnowHub",
+    "https://critical666.github.io/KnowHub/#/",
+    "https://critical666.github.io/KnowHub/#/knowledge",
+    "http://localhost:5173",
+    "http://localhost:3000"
+]
 
 # RAG知识库路由
 app.include_router(knowledge_bases.router)
