@@ -6,7 +6,7 @@ import type {
   ListResponse 
 } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://150.158.116.209:8000';
 
 /**
  * API 错误类
