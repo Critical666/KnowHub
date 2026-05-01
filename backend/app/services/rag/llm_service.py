@@ -24,10 +24,10 @@ class KimiLLMService:
             messages.extend(conversation_history)
         messages.append({"role": "user", "content": user_message})
         
+        # Kimi k2.5 模型不支持 temperature 参数，移除它
         stream = await self.client.chat.completions.create(
             model=self.model,
             messages=messages,
-            temperature=temperature,
             stream=True
         )
         

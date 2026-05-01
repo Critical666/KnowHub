@@ -16,6 +16,9 @@ from app.schemas.document import (
     DocumentListResponse
 )
 from app.services.storage.minio_client import MinioStorageService
+from app.services.rag.document_processor import DocumentProcessor
+from app.services.rag.embedding_service import BGEEmbeddingService
+from app.services.rag.vector_store import MilvusVectorStore
 
 router = APIRouter(prefix="/api/v1/knowledge-bases/{kb_id}/documents", tags=["documents"])
 
@@ -175,17 +178,33 @@ async def upload_document(
         db.commit()
         db.refresh(doc)
         
-        # TODO: 触发异步处理任务
-        # from app.celery_tasks.document_tasks import process_document_task
-        # process_document_task.delay(doc_id, object_name, kb_id, user.org_id)
-        
-        return DocumentUploadResponse(
-            id=doc_id,
-            filename=file.filename,
-            file_size=file_size,
-            file_type=ext,
-            status=DocStatus.PENDING
-        )
+        # 同步处理文档
+        try:
+            _process_document_core(doc_id, object_name, kb_id, user.org_id, db)
+            
+            # 重新获取文档状态
+            db.refresh(doc)
+            return DocumentUploadResponse(
+                id=doc_id,
+                filename=file.filename,
+                file_size=file_size,
+                file_type=ext,
+                status=doc.status
+            )
+        except Exception as process_error:
+            # 处理失败，但文件已上传，返回 FAILED 状态
+            import traceback
+            print(f"[ERROR] Document processing failed for {doc_id}: {str(process_error)}")
+            print(traceback.format_exc())
+            db.refresh(doc)
+            return DocumentUploadResponse(
+                id=doc_id,
+                filename=file.filename,
+                file_size=file_size,
+                file_type=ext,
+                status=doc.status,
+                error_message=doc.error_message if hasattr(doc, 'error_message') else str(process_error)
+            )
         
     except Exception as e:
         # 清理：如果上传失败，删除已创建的文档记录
@@ -281,3 +300,71 @@ def delete_document(
     db.commit()
     
     return None
+
+
+def _process_document_core(document_id: str, object_name: str, kb_id: str, org_id: str, db: Session):
+    """
+    文档处理核心逻辑（同步版本）
+    """
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise ValueError(f"Document {document_id} not found")
+    
+    doc.status = DocStatus.PROCESSING
+    db.commit()
+    
+    temp_file_path = None
+    
+    try:
+        storage = MinioStorageService(
+            endpoint=settings.MINIO_ENDPOINT,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY,
+            bucket=settings.MINIO_BUCKET,
+            secure=settings.MINIO_SECURE
+        )
+        
+        temp_file_path = f"/tmp/{document_id}_{doc.filename}"
+        storage.download_file(object_name, temp_file_path)
+        
+        processor = DocumentProcessor(
+            chunk_size=settings.DOCUMENT_CHUNK_SIZE,
+            chunk_overlap=settings.DOCUMENT_CHUNK_OVERLAP
+        )
+        chunks = processor.process(temp_file_path, metadata={"doc_id": document_id})
+        
+        embedding_service = BGEEmbeddingService(model_path=settings.BGE_MODEL_PATH)
+        texts = [c["content"] for c in chunks]
+        embeddings = embedding_service.embed_batch(texts)
+        
+        for i, chunk in enumerate(chunks):
+            chunk["embedding"] = embeddings[i]
+            chunk["doc_id"] = document_id
+        
+        vector_store = MilvusVectorStore(
+            db_path=settings.MILVUS_LITE_PATH,
+            dim=settings.EMBEDDING_DIMENSION
+        )
+        vector_store.insert_chunks(kb_id, chunks)
+        
+        doc.status = DocStatus.COMPLETED
+        doc.chunk_count = len(chunks)
+        
+        kb = db.query(KnowledgeBase).filter(KnowledgeBase.id == kb_id).first()
+        if kb:
+            kb.document_count += 1
+            kb.total_chunks += len(chunks)
+        
+        db.commit()
+        
+    except Exception as exc:
+        doc = db.query(Document).filter(Document.id == document_id).first()
+        if doc:
+            doc.status = DocStatus.FAILED
+            doc.error_message = str(exc)
+            db.commit()
+        raise exc
+        
+    finally:
+        if temp_file_path and os.path.exists(temp_file_path):
+            os.remove(temp_file_path)

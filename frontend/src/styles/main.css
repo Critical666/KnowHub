@@ -43,8 +43,6 @@
    6. Components
    具体 UI 组件样式
    ============================================ */
-@import './6-components/_buttons.css';
-@import './6-components/_kanban.css';
 @import './6-components/_modal.css';
 @import './6-components/_pages.css';
 @import './6-components/_chat.css';

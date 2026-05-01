@@ -1,8 +1,7 @@
-import { Routes, Route, Navigate, Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation, Outlet } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 import { DatabaseOutlined, HomeOutlined } from '@ant-design/icons';
 import HomePage from './pages/HomePage';
-import PricingPage from './pages/PricingPage';
 import KnowledgeBaseList from './components/KnowledgeBaseList';
 import ChatInterface from './components/ChatInterface';
 
@@ -65,7 +64,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/knowledge" element={<KnowledgeBaseList />} />
         <Route path="/knowledge/:kbId/chat" element={<ChatInterface />} />
-        <Route path="/pricing" element={<PricingPage />} />
+
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

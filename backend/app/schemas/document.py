@@ -12,6 +12,7 @@ class DocumentUploadResponse(BaseModel):
     file_type: str
     status: str
     message: str = "Document upload successful, processing queued"
+    error_message: Optional[str] = None
 
 
 class DocumentResponse(BaseModel):

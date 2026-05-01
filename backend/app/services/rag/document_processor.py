@@ -33,9 +33,8 @@ class DocumentProcessor:
         
         result = []
         for i, chunk in enumerate(chunks):
-            chunk_id = str(uuid.uuid4())
             result.append({
-                "id": chunk_id,
+                "id": i,  # Milvus Lite 要求 id 是 int64，使用索引作为 id
                 "content": chunk,
                 "metadata": {**doc_metadata, "chunk_index": i, "total_chunks": len(chunks)},
                 "chunk_index": i

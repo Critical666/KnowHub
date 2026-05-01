@@ -3,11 +3,7 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    # 现有配置
-    CLERK_SECRET_KEY: str
-    CLERK_PUBLISHABLE_KEY: str
-    CLERK_JWKS_URL: str
-    CLEAK_WEBHOOK_SECRET: str
+    # 前端地址
     FRONTEND_URL: str = "http://localhost:5173"
     DATABASE_URL: str = "sqlite:///./knowhub.db"
     
@@ -32,7 +28,7 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = False
     
     # BGE配置
-    BGE_MODEL_PATH: str = "BAAI/bge-m3"
+    BGE_MODEL_PATH: str = "./model/bge-m3"
     EMBEDDING_DIMENSION: int = 1024
     
     # 文档处理配置
@@ -41,8 +37,8 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE: int = 52428800
     
     # 检索配置
-    RETRIEVAL_TOP_K: int = 5
-    RETRIEVAL_SCORE_THRESHOLD: float = 0.7
+    RETRIEVAL_TOP_K: int = 10
+    RETRIEVAL_SCORE_THRESHOLD: float = 0.5
 
     # 组织人数设置
     FREE_TIER_MEMBERSHIP_LIMIT:int = 2

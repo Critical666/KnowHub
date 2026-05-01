@@ -84,16 +84,29 @@ const KnowledgeBaseList = () => {
   // 上传文档
   const handleUpload = async (file, kbId) => {
     setUploadLoading(true);
+    const hide = message.loading('正在上传并处理文档，请稍候...', 0);
     try {
-      await uploadDocument(kbId, file);
-      message.success('上传成功');
+      // 设置超时时间为 120 秒
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      
+      await uploadDocument(kbId, file, controller.signal);
+      clearTimeout(timeoutId);
+      
+      hide();
+      message.success('上传并处理成功');
       // 刷新文档列表
       const response = await getDocuments(kbId);
       setDocuments(response.items);
       // 刷新知识库列表以更新文档计数
       fetchKnowledgeBases();
     } catch (error) {
-      message.error('上传失败: ' + (error.message || '未知错误'));
+      hide();
+      if (error.name === 'AbortError') {
+        message.warning('处理时间较长，请刷新页面查看结果');
+      } else {
+        message.error('上传失败: ' + (error.message || '未知错误'));
+      }
       console.error(error);
     } finally {
       setUploadLoading(false);

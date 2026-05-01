@@ -95,7 +95,7 @@ export async function getDocuments(kbId: string): Promise<ListResponse<Document>
   return fetchAPI<ListResponse<Document>>(`${KB_BASE}/${kbId}/documents`);
 }
 
-export async function uploadDocument(kbId: string, file: File): Promise<Document> {
+export async function uploadDocument(kbId: string, file: File, signal?: AbortSignal): Promise<Document> {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -104,6 +104,7 @@ export async function uploadDocument(kbId: string, file: File): Promise<Document
     {
       method: 'POST',
       body: formData,
+      signal, // 支持 AbortController 取消请求
     }
   );
 
